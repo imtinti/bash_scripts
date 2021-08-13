@@ -23,20 +23,20 @@ ftp_host_download="200.145.185.149"
 ftp_user_download="nievinski"
 ftp_pass_download="M@m@0Papaya"
 
-#(objetivo, porém servidor está indisponível
-#ftp_host_upload=143.54.248.215
-#ftp_port_upload=2121
-#ftp_user_upload=stbr
-#ftp_pass_upload=F3l1p3
+#objetivo
+ftp_host_upload=143.54.248.215
+ftp_port_upload=2121
+ftp_user_upload=stbr
+ftp_pass_upload=F3l1p3
 
 #ftp credentials to upload files (TESTING)
-ftp_host_upload="ftp.dlptest.com"
-ftp_user_upload="dlpuser"
-ftp_pass_upload="rNrKYTX9g7z3RgJRmxWuGHbeu"
+#ftp_host_upload="ftp.dlptest.com"
+#ftp_user_upload="dlpuser"
+#ftp_pass_upload="rNrKYTX9g7z3RgJRmxWuGHbeu"
 
 #User's input:
 station=${1}  
-doy=${2}  # day of year. Precisa acrescentar 0 na frente caso o dia desejado seja menor do que 100
+doy=${2}  # day of year. 
 fourDigitYear=${3}
 
 
@@ -105,7 +105,7 @@ then
 else
 	echo "Cannot create temporary directory. Check your inputs."
 fi
- 
+
 
 ######################################################################
 #CONNECT TO SERVER AND DOWNLOAD FILES TO TEMPORARY FOLDER
@@ -121,13 +121,10 @@ ftp -n $ftp_host_download<<END_FTP_SCRIPT
 	cd $fourDigitYear
 	 
 	cd $remoteDirectoryName         
-
        	lcd $localDirTemp
         	
        	mget "*${twoDigityear}_.gz"
-
        	bye
-
 END_FTP_SCRIPT
 
 
@@ -152,17 +149,14 @@ done
 ######################################################################
 #CONNECT ALL FILES OF THE DAY INTO ONE SINGLE
 
-#como há a ideia de fazer paralelismo entre os dias, fazer a concatenação utilizando o nome da estação
-#não usar "*."
-
 ######################################################################
 
-rm *.gz #remove os arquivos originais e os não descompactados
+rm *.gz 
 
 
 echo $station$doy_*
 
-exit
+#exit
 
 cat $station$doy* > $station$doy.$twoDigityear'_'
 
@@ -176,7 +170,7 @@ fileNameRINEX=$station$doy'0'.$twoDigityear$suffix
 
 mkdir -p "OUT_RINEX"
 
-./teqc -sep sbf `pwd`/diretorioTemporario/$station$doy.$twoDigityear'_' >  `pwd`/"OUT_RINEX"/$fileNameRINEX
+./teqc -sep sbf `pwd`/TemporaryDirectory/$station$doy.$twoDigityear'_' >  `pwd`/"OUT_RINEX"/$fileNameRINEX
 
 #delet temporary dir
 
@@ -188,7 +182,7 @@ ZIPfileNameRINEX=$station$doy'0'_$twoDigityear$suffix
 #ZIP
 ######################################################################
 
-zip -jm `pwd`/OUT_RINEX/$ZIPfileNameRINEX.zip `pwd`/OUT_RINEX/$fileNameRINEX
+gzip `pwd`/OUT_RINEX/ZIPfileNameRINEX `pwd`/OUT_RINEX/$fileNameRINEX
 
 ######################################################################
 #UPLOAD TO SERVER
@@ -200,18 +194,9 @@ ftp -n $ftp_host_upload $ftp_port_upload<<END_FTP_SCRIPT
 	passive
 	
 	prompt        
-
        	lcd `pwd`/OUT_RINEX/
         	
        	put "$station$doy*"
-
        	bye
 
 END_FTP_SCRIPT
-
-
-#rm -rf `pwd`/OUT_RINEX/
-
-echo "Script end"
-
-exit
