@@ -36,7 +36,7 @@ ftp_pass_upload=F3l1p3
 
 #User's input:
 station=${1}  
-doy=${2}  # day of year. 
+doy=${2}  # day of year. Precisa acrescentar 0 na frente caso o dia desejado seja menor do que 100
 fourDigitYear=${3}
 
 
@@ -149,14 +149,17 @@ done
 ######################################################################
 #CONNECT ALL FILES OF THE DAY INTO ONE SINGLE
 
+#como há a ideia de fazer paralelismo entre os dias, fazer a concatenação utilizando o nome da estação
+#não usar "*."
+
 ######################################################################
 
-rm *.gz 
+rm *.gz #remove os arquivos originais e os não descompactados
 
 
 echo $station$doy_*
 
-#exit
+
 
 cat $station$doy* > $station$doy.$twoDigityear'_'
 
@@ -166,37 +169,43 @@ cd ..
 #CONVERT TO RINEX
 ######################################################################
 
+mkdir -p "OUT_RINEX"
+
 fileNameRINEX=$station$doy'0'.$twoDigityear$suffix
 
-mkdir -p "OUT_RINEX"
 
 ./teqc -sep sbf `pwd`/TemporaryDirectory/$station$doy.$twoDigityear'_' >  `pwd`/"OUT_RINEX"/$fileNameRINEX
 
-#delet temporary dir
 
-#rm -rf $localDirTemp
 
-ZIPfileNameRINEX=$station$doy'0'_$twoDigityear$suffix
+rm -rf $localDirTemp #delet temporary directory
+
+
 
 ######################################################################
 #ZIP
 ######################################################################
 
-gzip `pwd`/OUT_RINEX/ZIPfileNameRINEX `pwd`/OUT_RINEX/$fileNameRINEX
+gzip -k `pwd`/"OUT_RINEX"/$fileNameRINEX
+
 
 ######################################################################
 #UPLOAD TO SERVER
 ######################################################################
 
+
 ftp -n $ftp_host_upload $ftp_port_upload<<END_FTP_SCRIPT
         user $ftp_user_upload $ftp_pass_upload
       
-	passive
-	
-	prompt        
+	binary
+	hash
+	debug on
+	passive	
+	prompt      
+  
        	lcd `pwd`/OUT_RINEX/
         	
-       	put "$station$doy*"
+       	put "$fileNameRINEX.gz"
        	bye
 
 END_FTP_SCRIPT
