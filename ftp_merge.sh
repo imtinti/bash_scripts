@@ -40,35 +40,59 @@ doy=${2}  # day of year. Precisa acrescentar 0 na frente caso o dia desejado sej
 fourDigitYear=${3}
 
 
-if [ -z "$1" ]; then
-echo "Please, insert station code"
-echo "Using example: <script name> <station code> <day of year> <four year digit>"
-echo "Example: ftp_merge.sh STBR 020 2021"
-exit
+if [ $# -eq 0 ] #test if was not inserted parameters by user
+
+then
+
+station="STBR"
+fourDigitYear=$(date +%Y)
+
+doy=$(date +%j)
+
+
+	if [ $doy -eq 1 ] #test if is the first day of the year
+	then
+		let doy=365
+	else
+		let "doy--"
+	fi
+
+
+##falta tratar o caso do ano bisexto
+
+else
+
+	if [ -z "$1" ]; then
+	echo "Please, insert station code"
+	echo "Using example: <script name> <station code> <day of year> <four year digit>"
+	echo "Example: ftp_merge.sh STBR 020 2021"
+	exit
+	fi
+
+	if [ -z "$2" ]; then
+	echo "Please, insert day of year"
+	echo "Using example: <script name> <station code> <day of year> <four year digit>"
+	echo "Example: ftp_merge.sh STBR 020 2021"
+	exit
+	fi
+
+	if [ -z "$3" ]; then
+
+	echo "Please, insert four year digit"
+	echo "Using example: <script name> <station code> <day of year> <four year digit>"
+	echo "Example: ftp_merge.sh STBR 020 2021"
+	exit
+	fi
+
+
+	if [[ ${#3} -lt 4 ]]; then
+	echo "Please, insert FOUR year digit"
+	echo "Using example: <script name> <station code> <day of year> <four year digit>"
+	echo "Example: ftp_merge.sh STBR 020 2021"
+	fi
+
+
 fi
-
-if [ -z "$2" ]; then
-echo "Please, insert day of year"
-echo "Using example: <script name> <station code> <day of year> <four year digit>"
-echo "Example: ftp_merge.sh STBR 020 2021"
-exit
-fi
-
-if [ -z "$3" ]; then
-
-echo "Please, insert four year digit"
-echo "Using example: <script name> <station code> <day of year> <four year digit>"
-echo "Example: ftp_merge.sh STBR 020 2021"
-exit
-fi
-
-
-if [[ ${#3} -lt 4 ]]; then
-echo "Please, insert FOUR year digit"
-echo "Using example: <script name> <station code> <day of year> <four year digit>"
-echo "Example: ftp_merge.sh STBR 020 2021"
-fi
-
 
 #example: <script name> <station code> <day of year> <four year digit>
 
@@ -87,6 +111,7 @@ fi
 
 
 remoteDirectoryName="${twoDigityear}${doy}"
+
 
 #fileName = [cod_estacao(STBR)] + [DIA] + [hora/letra (a-x)] + [ano_(2 dígitos)] [.gz]
 
